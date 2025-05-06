@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('patient_id')->unique()->constrained('patients')->onDelete('cascade')->comment('Зовнішній ключ до таблиці patients, ідентифікатор пацієнта, для якого ведеться картка');
+            $table->text('diagnosis')->nullable()->comment('Попередній або остаточний діагноз');
+            $table->text('treatment_plan')->nullable()->comment('План лікування пацієнта');
+            $table->text('notes')->nullable()->comment('Додаткові нотатки лікаря щодо стану пацієнта');
             $table->timestamps();
         });
     }

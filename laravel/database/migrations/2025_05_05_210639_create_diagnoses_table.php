@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('diagnoses', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique()->nullable()->comment('Назва діагнозу');
+            $table->text('description')->nullable()->comment('Опис діагнозу');
             $table->timestamps();
         });
     }

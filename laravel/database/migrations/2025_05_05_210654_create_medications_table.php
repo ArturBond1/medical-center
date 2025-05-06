@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('medications', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique()->nullable()->comment('Назва медикаменту');
+            $table->string('dosage')->nullable()->comment('Дозування медикаменту');
+            $table->text('description')->nullable()->comment('Опис медикаменту');
+            $table->decimal('cost', 10, 2)->nullable()->comment('Вартість медикаменту (за потреби)');
             $table->timestamps();
         });
     }

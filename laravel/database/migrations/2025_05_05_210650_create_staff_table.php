@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('staff', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade')->comment('Зовнішній ключ до таблиці users для облікового запису працівника');
+            $table->string('position')->nullable()->comment('Посада працівника (наприклад, медсестра, адміністратор)');
+            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null')->comment('Зовнішній ключ до таблиці departments, до якого належить працівник');
             $table->timestamps();
         });
     }

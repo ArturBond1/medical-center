@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique()->nullable()->comment('Назва відділення медичного центру');
+            $table->text('description')->nullable()->comment('Опис відділення');
             $table->timestamps();
         });
     }

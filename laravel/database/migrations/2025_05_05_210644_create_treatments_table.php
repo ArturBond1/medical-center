@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('treatments', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique()->nullable()->comment('Назва лікування або процедури');
+            $table->text('description')->nullable()->comment('Опис лікування або процедури');
+            $table->decimal('cost', 10, 2)->nullable()->comment('Вартість лікування (за потреби)');
             $table->timestamps();
         });
     }

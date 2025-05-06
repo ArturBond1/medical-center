@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique()->nullable()->comment('Назва ролі користувача (наприклад, Адмін, Лікар, Пацієнт)');
             $table->timestamps();
         });
     }

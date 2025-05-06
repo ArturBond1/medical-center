@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('doctors', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade')->comment('Зовнішній ключ до таблиці users для облікового запису лікаря');
+            $table->string('specialization')->nullable()->comment('Спеціалізація лікаря');
+            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null')->comment('Зовнішній ключ до таблиці departments, до якого належить лікар');
             $table->timestamps();
         });
     }
