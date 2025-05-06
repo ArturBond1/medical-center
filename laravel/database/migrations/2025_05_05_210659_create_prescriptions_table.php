@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('prescriptions', function (Blueprint $table) {
+        Schema::create('staff', function (Blueprint $table) {
             $table->id();
             $table->foreignId('appointment_id')->constrained('appointments')->onDelete('cascade')->comment('Зовнішній ключ до таблиці appointments, до якого відноситься призначення');
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade')->comment('Зовнішній ключ до таблиці patients, для якого виписано призначення');
-            $table->foreignId('doctor_id')->constrained('doctors')->onDelete('cascade')->comment('Зовнішній ключ до таблиці doctors, який виписав призначення');
-            $table->foreignId('medication_id')->constrained('medications')->onDelete('cascade')->comment('Зовнішній ключ до таблиці medications, який було призначено');
+            $table->foreignId('patient_id')->constrained('staff')->onDelete('cascade')->comment('Зовнішній ключ до таблиці staff, для якого виписано призначення');
+            $table->foreignId('doctor_id')->constrained('staff')->onDelete('cascade')->comment('Зовнішній ключ до таблиці staff, який виписав призначення');
+            $table->foreignId('medication_id')->constrained('staff')->onDelete('cascade')->comment('Зовнішній ключ до таблиці staff, який було призначено');
             $table->string('dosage')->nullable()->comment('Призначене дозування');
             $table->string('frequency')->nullable()->comment('Частота прийому');
             $table->text('notes')->nullable()->comment('Додаткові інструкції щодо прийому ліків');
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('prescriptions');
+        Schema::dropIfExists('staff');
     }
 };

@@ -25,7 +25,7 @@ class MedicalRecord extends Model
 
     public function diagnoses(): BelongsToMany
     {
-        return $this->belongsToMany(Diagnosis::class, 'medical_record_diagnosis');
+        return $this->belongsToMany(Diagnoses::class, 'medical_record_diagnosis');
     }
 
     public function treatments(): BelongsToMany

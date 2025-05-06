@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('medical_records', function (Blueprint $table) {
+        Schema::create('staff', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->unique()->constrained('patients')->onDelete('cascade')->comment('Зовнішній ключ до таблиці patients, ідентифікатор пацієнта, для якого ведеться картка');
+            $table->foreignId('patient_id')->unique()->constrained('staff')->onDelete('cascade')->comment('Зовнішній ключ до таблиці staff, ідентифікатор пацієнта, для якого ведеться картка');
             $table->text('diagnosis')->nullable()->comment('Попередній або остаточний діагноз');
             $table->text('treatment_plan')->nullable()->comment('План лікування пацієнта');
             $table->text('notes')->nullable()->comment('Додаткові нотатки лікаря щодо стану пацієнта');
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('medical_records');
+        Schema::dropIfExists('staff');
     }
 };
