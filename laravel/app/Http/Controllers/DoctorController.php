@@ -12,11 +12,25 @@ class DoctorController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $doctors = Doctor::with('user', 'department')->paginate(10);
-        return view('doctors.index', compact('doctors'));
+        $perPage = $request->input('perPage', 3);
+
+        $doctorsQuery = Doctor::with('user', 'department')
+            ->when($request->filled('id'), fn($q) => $q->where('id', $request->input('id')))
+            ->when($request->filled('user_name'), fn($q) => $q->whereHas('user', fn($q2) =>
+            $q2->where('name', 'like', '%' . $request->input('user_name') . '%')
+            ))
+            ->when($request->filled('specialization'), fn($q) => $q->where('specialization', 'like', '%' . $request->input('specialization') . '%'))
+            ->when($request->filled('department_name'), fn($q) => $q->whereHas('department', fn($q2) =>
+            $q2->where('name', 'like', '%' . $request->input('department_name') . '%')
+            ));
+
+        $doctors = $doctorsQuery->paginate($perPage)->appends($request->query());
+
+        return view('doctors.index', compact('doctors', 'perPage'));
     }
+
 
     /**
      * @return \Illuminate\Contracts\View\View

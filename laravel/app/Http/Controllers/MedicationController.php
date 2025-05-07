@@ -10,11 +10,37 @@ class MedicationController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $medications = Medication::paginate(10);
+        $query = Medication::query();
+
+        if ($request->has('id') && $request->id) {
+            $query->where('id', $request->id);
+        }
+        if ($request->has('name') && $request->name) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+        if ($request->has('dosage') && $request->dosage) {
+            $query->where('dosage', 'like', '%' . $request->dosage . '%');
+        }
+        if ($request->has('description') && $request->description) {
+            $query->where('description', 'like', '%' . $request->description . '%');
+        }
+        if ($request->has('cost') && $request->cost) {
+            $query->where('cost', $request->cost);
+        }
+        if ($request->has('prescriptions_count') && $request->prescriptions_count) {
+            $query->whereHas('prescriptions', function($q) use ($request) {
+                $q->havingRaw('COUNT(*) >= ?', [$request->prescriptions_count]);
+            });
+        }
+
+        $perPage = $request->get('perPage', 3);
+        $medications = $query->paginate($perPage);
+
         return view('medications.index', compact('medications'));
     }
+
 
     /**
      * @return \Illuminate\Contracts\View\View

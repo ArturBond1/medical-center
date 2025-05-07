@@ -12,11 +12,33 @@ class TreatmentController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $treatments = Treatment::with('patient.user', 'doctor.user')->paginate(10);
-        return view('treatments.index', compact('treatments'));
+        $treatmentsQuery = Treatment::with('patient.user', 'doctor.user');
+        if ($request->filled('patient_id')) {
+            $treatmentsQuery->where('patient_id', $request->input('patient_id'));
+        }
+        if ($request->filled('doctor_id')) {
+            $treatmentsQuery->where('doctor_id', $request->input('doctor_id'));
+        }
+        if ($request->filled('diagnosis')) {
+            $treatmentsQuery->where('diagnosis', 'like', '%' . $request->input('diagnosis') . '%');
+        }
+        if ($request->filled('start_date')) {
+            $treatmentsQuery->whereDate('start_date', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $treatmentsQuery->whereDate('end_date', $request->input('end_date'));
+        }
+        $perPage = $request->input('per_page', 3);
+
+        $treatments = $treatmentsQuery->paginate($perPage)->appends($request->query());
+        $patients = Patient::with('user')->get()->pluck('user.name', 'id');
+        $doctors = Doctor::with('user')->get()->pluck('user.name', 'id');
+
+        return view('treatments.index', compact('treatments', 'patients', 'doctors'));
     }
+
 
     /**
      * @return \Illuminate\Contracts\View\View

@@ -10,9 +10,22 @@ class DepartmentController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $departments = Department::paginate(10);
+        $departmentsQuery = Department::query();
+        if ($request->filled('id')) {
+            $departmentsQuery->where('id', $request->input('id'));
+        }
+        if ($request->filled('name')) {
+            $departmentsQuery->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        // Фільтрація за Описом
+        if ($request->filled('description')) {
+            $departmentsQuery->where('description', 'like', '%' . $request->input('description') . '%');
+        }
+        $departments = $departmentsQuery->paginate(3)->appends($request->query());
+
         return view('departments.index', compact('departments'));
     }
 

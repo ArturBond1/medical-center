@@ -11,12 +11,23 @@ class PatientController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $patients = Patient::with('user')->paginate(10);
-        //dd($patients);
-        return view('patients.index', compact('patients'));
+        $perPage = $request->input('perPage', 3);
+
+        $patientsQuery = Patient::with('user')
+            ->when($request->filled('id'), fn($q) => $q->where('id', $request->input('id')))
+            ->when($request->filled('user_name'), fn($q) => $q->whereHas('user', fn($q2) =>
+            $q2->where('name', 'like', '%' . $request->input('user_name') . '%')
+            ))
+            ->when($request->filled('gender'), fn($q) => $q->where('gender', $request->input('gender')))
+            ->when($request->filled('phone_number'), fn($q) => $q->where('phone_number', 'like', '%' . $request->input('phone_number') . '%'));
+
+        $patients = $patientsQuery->paginate($perPage)->appends($request->query());
+
+        return view('patients.index', compact('patients', 'perPage'));
     }
+
 
     /**
      * @return \Illuminate\Contracts\View\View
@@ -93,6 +104,7 @@ class PatientController extends Controller
     {
         //  if ($patient->medicalRecords()->count() > 0 || $patient->appointments()->count() > 0) {
         //      return redirect()->route('patients.index')->with('error', 'Неможливо видалити пацієнта, який має медичні записи або прийоми.');
+        //
         //  }
 
         $patient->delete();

@@ -10,10 +10,17 @@ class RoleController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::paginate(10);
-        return view('roles.index', compact('roles'));
+        $perPage = $request->input('perPage', 3);
+
+        $rolesQuery = Role::query()
+            ->when($request->filled('id'), fn($q) => $q->where('id', $request->input('id')))
+            ->when($request->filled('name'), fn($q) => $q->where('name', 'like', '%' . $request->input('name') . '%'));
+
+        $roles = $rolesQuery->paginate($perPage)->appends($request->query());
+
+        return view('roles.index', compact('roles', 'perPage'));
     }
 
     /**

@@ -9,10 +9,28 @@ use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with(['patient', 'doctor'])->paginate(10);
-        return view('appointments.index', compact('appointments'));
+        $appointmentsQuery = Appointment::with(['patient', 'doctor']);
+        if ($request->filled('patient_id')) {
+            $appointmentsQuery->where('patient_id', $request->input('patient_id'));
+        }
+        if ($request->filled('doctor_id')) {
+            $appointmentsQuery->where('doctor_id', $request->input('doctor_id'));
+        }
+        if ($request->filled('appointment_date')) {
+            $appointmentsQuery->where('appointment_date', $request->input('appointment_date'));
+        }
+        if ($request->filled('status')) {
+            $appointmentsQuery->where('status', $request->input('status'));
+        }
+        $patients = Patient::all()->pluck('user.name', 'id');
+        $doctors = Doctor::all()->pluck('user.name', 'id');
+        $perPage = $request->input('per_page', 3);
+
+        $appointments = $appointmentsQuery->paginate($perPage)->appends($request->query());
+
+        return view('appointments.index', compact('appointments', 'patients', 'doctors'));
     }
 
     public function create()

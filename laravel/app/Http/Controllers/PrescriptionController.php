@@ -14,11 +14,32 @@ class PrescriptionController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $prescriptions = Prescription::with(['doctor', 'patient'])->paginate(10);
-        return view('prescriptions.index', compact('prescriptions'));
+        $prescriptionsQuery = Prescription::with(['doctor', 'patient', 'medication']);
+        if ($request->filled('doctor_id')) {
+            $prescriptionsQuery->where('doctor_id', $request->input('doctor_id'));
+        }
+        if ($request->filled('patient_id')) {
+            $prescriptionsQuery->where('patient_id', $request->input('patient_id'));
+        }
+        if ($request->filled('medication_id')) {
+            $prescriptionsQuery->where('medication_id', $request->input('medication_id'));
+        }
+        if ($request->filled('notes')) {
+            $prescriptionsQuery->where('notes', 'like', '%' . $request->input('notes') . '%');
+        }
+
+        $perPage = $request->input('per_page', 3);
+        $prescriptions = $prescriptionsQuery->paginate($perPage)->appends($request->query());
+
+        $patients = Patient::all()->pluck('user.name', 'id');
+        $doctors = Doctor::all()->pluck('user.name', 'id');
+        $medications = Medication::all()->pluck('name', 'id');
+
+        return view('prescriptions.index', compact('prescriptions', 'patients', 'doctors', 'medications'));
     }
+
 
     /**
      * @return \Illuminate\Contracts\View\View

@@ -11,10 +11,26 @@ class MedicalRecordController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $medicalRecords = MedicalRecord::with('patient.user')->paginate(10);
-        return view('medical_records.index', compact('medicalRecords')); // Змінено на 'medical_records.index'
+        $query = MedicalRecord::with('patient.user');
+        if ($request->has('patient_id') && $request->patient_id) {
+            $query->where('patient_id', $request->patient_id);
+        }
+        if ($request->has('diagnosis') && $request->diagnosis) {
+            $query->where('diagnosis', 'like', '%' . $request->diagnosis . '%');
+        }
+        if ($request->has('treatment_plan') && $request->treatment_plan) {
+            $query->where('treatment_plan', 'like', '%' . $request->treatment_plan . '%');
+        }
+        if ($request->has('notes') && $request->notes) {
+            $query->where('notes', 'like', '%' . $request->notes . '%');
+        }
+        $medicalRecords = $query->paginate(request('perPage', 3));
+
+        $patients = Patient::all()->pluck('user.name', 'id');
+
+        return view('medical_records.index', compact('medicalRecords', 'patients'));
     }
 
     /**

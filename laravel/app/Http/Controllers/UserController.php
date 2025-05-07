@@ -12,10 +12,21 @@ class UserController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('role')->paginate(10);
-        return view('users.index', compact('users'));
+        $perPage = $request->input('perPage', 3);
+
+        $usersQuery = User::with('role')
+            ->when($request->filled('id'), fn($q) => $q->where('id', $request->input('id')))
+            ->when($request->filled('name'), fn($q) => $q->where('name', 'like', '%' . $request->input('name') . '%'))
+            ->when($request->filled('email'), fn($q) => $q->where('email', 'like', '%' . $request->input('email') . '%'))
+            ->when($request->filled('role_id'), fn($q) => $q->where('role_id', $request->input('role_id')));
+
+        $users = $usersQuery->paginate($perPage)->appends($request->query());
+
+        $roles = Role::all();
+
+        return view('users.index', compact('users', 'roles', 'perPage'));
     }
 
     /**

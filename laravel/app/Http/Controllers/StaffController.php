@@ -12,11 +12,33 @@ class StaffController extends Controller
     /**
      * @return \Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $staffMembers = Staff::with('user', 'department')->paginate(10);
+        $perPage = $request->input('perPage', 3);
+
+        $staffMembersQuery = Staff::with('user', 'department')
+            ->when($request->filled('id'), function ($query) use ($request) {
+                $query->where('id', $request->input('id'));
+            })
+            ->when($request->filled('user_name'), function ($query) use ($request) {
+                $query->whereHas('user', function ($subQuery) use ($request) {
+                    $subQuery->where('name', 'like', '%' . $request->input('user_name') . '%');
+                });
+            })
+            ->when($request->filled('department_name'), function ($query) use ($request) {
+                $query->whereHas('department', function ($subQuery) use ($request) {
+                    $subQuery->where('name', 'like', '%' . $request->input('department_name') . '%');
+                });
+            })
+            ->when($request->filled('position'), function ($query) use ($request) {
+                $query->where('position', 'like', '%' . $request->input('position') . '%');
+            });
+
+        $staffMembers = $staffMembersQuery->paginate($perPage)->appends($request->query());
+
         return view('staff.index', compact('staffMembers'));
     }
+
 
     /**
      * @return \Illuminate\Contracts\View\View
