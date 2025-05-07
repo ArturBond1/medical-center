@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Prescription;
-use App\Models\Appointment;
-use App\Models\Medication;
+use App\Models\Doctor;
+use App\Models\Patient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Medication;
 
 class PrescriptionController extends Controller
 {
@@ -14,8 +16,7 @@ class PrescriptionController extends Controller
      */
     public function index()
     {
-        $prescriptions = Prescription::with('appointment.patient.user', 'doctor.user', 'medications')
-            ->paginate(10);
+        $prescriptions = Prescription::with(['doctor', 'patient'])->paginate(10);
         return view('prescriptions.index', compact('prescriptions'));
     }
 
@@ -24,9 +25,10 @@ class PrescriptionController extends Controller
      */
     public function create()
     {
-        $appointments = Appointment::with('patient.user', 'doctor.user')->get()->pluck('full_info', 'id');
+        $patients = Patient::all()->pluck('user.name', 'id');
+        $doctors = Doctor::all()->pluck('user.name', 'id');
         $medications = Medication::all()->pluck('name', 'id');
-        return view('prescriptions.create', compact('appointments', 'medications'));
+        return view('prescriptions.create', compact('doctors', 'patients', 'medications'));
     }
 
     /**
@@ -38,34 +40,20 @@ class PrescriptionController extends Controller
         $request->validate([
             'appointment_id' => 'required|exists:appointments,id',
             'doctor_id' => 'required|exists:doctors,id',
-            'medication_ids' => 'required|array',
-            'medication_ids.*' => 'exists:medications,id',
-            'dosage' => 'required|array',
-            'dosage.*' => 'nullable|string|max:255',
-            'frequency' => 'required|array',
-            'frequency.*' => 'nullable|string|max:255',
-            'duration' => 'required|array',
-            'duration.*' => 'nullable|string|max:255',
-            'notes' => 'nullable|string|max:1000',
+            'patient_id' => 'required|exists:patients,id',
+            'medication_id' => 'required|exists:medications,id',
+            'notes' => 'nullable|string',
         ]);
 
-        $prescription = Prescription::create([
-            'appointment_id' => $request->appointment_id,
-            'doctor_id' => $request->doctor_id,
-            'notes' => $request->notes,
-        ]);
+        $prescription = new Prescription();
+        $prescription->appointment_id = $request->appointment_id;
+        $prescription->doctor_id = $request->doctor_id;
+        $prescription->patient_id = $request->patient_id;
+        $prescription->medication_id = $request->medication_id;
+        $prescription->notes = $request->notes;
+        $prescription->save();
 
-        $medicationData = [];
-        foreach ($request->medication_ids as $key => $medicationId) {
-            $medicationData[$medicationId] = [
-                'dosage' => $request->dosage[$key] ?? '',
-                'frequency' => $request->frequency[$key] ?? '',
-                'duration' => $request->duration[$key] ?? '',
-            ];
-        }
-        $prescription->medications()->attach($medicationData);
-
-        return redirect()->route('prescriptions.index')->with('success', 'Рецепт створено успішно.');
+        return redirect()->route('prescriptions.index')->with('success', 'Prescription created successfully.');
     }
 
     /**
@@ -74,7 +62,7 @@ class PrescriptionController extends Controller
      */
     public function show(Prescription $prescription)
     {
-        $prescription->load('appointment.patient.user', 'doctor.user', 'medications');
+        $prescription->load('doctor', 'patient', 'medication');
         return view('prescriptions.show', compact('prescription'));
     }
 
@@ -84,11 +72,10 @@ class PrescriptionController extends Controller
      */
     public function edit(Prescription $prescription)
     {
-        $prescription->load('medications');
-        $appointments = Appointment::with('patient.user', 'doctor.user')->get()->pluck('full_info', 'id');
+        $patients = Patient::all()->pluck('user.name', 'id');
+        $doctors = Doctor::all()->pluck('user.name', 'id');
         $medications = Medication::all()->pluck('name', 'id');
-        $prescriptionMedicationIds = $prescription->medications->pluck('id')->toArray();
-        return view('prescriptions.edit', compact('prescription', 'appointments', 'medications', 'prescriptionMedicationIds'));
+        return view('prescriptions.edit', compact('prescription', 'doctors', 'patients', 'medications'));
     }
 
     /**
@@ -99,35 +86,17 @@ class PrescriptionController extends Controller
     public function update(Request $request, Prescription $prescription)
     {
         $request->validate([
-            'appointment_id' => 'required|exists:appointments,id',
             'doctor_id' => 'required|exists:doctors,id',
-            'medication_ids' => 'required|array',
-            'medication_ids.*' => 'exists:medications,id',
-            'dosage' => 'required|array',
-            'dosage.*' => 'nullable|string|max:255',
-            'frequency' => 'required|array',
-            'frequency.*' => 'nullable|string|max:255',
-            'duration' => 'required|array',
-            'duration.*' => 'nullable|string|max:255',
-            'notes' => 'nullable|string|max:1000',
+            'patient_id' => 'required|exists:patients,id',
+            'medication_id' => 'required|exists:medications,id',
+            'notes' => 'nullable|string',
         ]);
 
-        $prescription->update([
-            'appointment_id' => $request->appointment_id,
-            'doctor_id' => $request->doctor_id,
-            'notes' => $request->notes,
-        ]);
-
-        $medicationData = [];
-        foreach ($request->medication_ids as $key => $medicationId) {
-            $medicationData[$medicationId] = [
-                'dosage' => $request->dosage[$key] ?? '',
-                'frequency' => $request->frequency[$key] ?? '',
-                'duration' => $request->duration[$key] ?? '',
-            ];
-        }
-
-        $prescription->medications()->sync($medicationData);
+        $prescription->doctor_id = $request->doctor_id;
+        $prescription->patient_id = $request->patient_id;
+        $prescription->medication_id = $request->medication_id;
+        $prescription->notes = $request->notes;
+        $prescription->save();
 
         return redirect()->route('prescriptions.index')->with('success', 'Рецепт оновлено успішно.');
     }
@@ -139,7 +108,8 @@ class PrescriptionController extends Controller
     public function destroy(Prescription $prescription)
     {
         $prescription->delete();
-        return redirect()->route('prescriptions.index')->with('success', 'Рецепт видалено успішно.');
+
+        return redirect()->route('prescriptions.index')->with('success', 'Рецепт було видалено успішно.');
     }
 }
 

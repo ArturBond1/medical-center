@@ -53,9 +53,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('prescriptions.index') }}">Рецепти</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('diagnoses.index') }}">Діагнози</a>
-                </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('medical_records.index') }}">Мед картки</a>
                     </li>

@@ -1,22 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1>Деталі рецепту</h1>
+    <h1>Деталі рецепта #{{ $prescription->id }}</h1>
 
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Рецепт #{{ $prescription->id }}</h5>
-            <p class="card-text"><strong>Пацієнт:</strong> {{ $prescription->appointment->patient->user->name }}</p>
-            <p class="card-text"><strong>Лікар:</strong> {{ $prescription->doctor->user->name }}</p>
-            <p class="card-text"><strong>Призначення:</strong> {{ $prescription->appointment->title }}</p>
-            <p class="card-text"><strong>Ліки:</strong></p>
-            <ul>
-                @foreach($prescription->medications as $medication)
-                    <li>{{ $medication->name }} ({{ $medication->pivot->dosage }}, {{ $medication->pivot->frequency }}, {{ $medication->pivot->duration }})</li>
-                @endforeach
-            </ul>
-            <p class="card-text"><strong>Примітки:</strong> {{ $prescription->notes }}</p>
-            <a href="{{ route('prescriptions.index') }}" class="btn btn-secondary">Назад до списку рецептів</a>
-        </div>
+    <ul class="list-group mb-3">
+        <li class="list-group-item"><strong>ID прийому:</strong> {{ $prescription->appointment_id }}</li>
+        <li class="list-group-item"><strong>Лікар:</strong> {{ $prescription->doctor->user->name ?? '—' }}</li>
+        <li class="list-group-item"><strong>Пацієнт:</strong> {{ $prescription->patient->user->name ?? '—' }}</li>
+        <li class="list-group-item"><strong>Ліки:</strong> {{ $prescription->medication->name ?? '—' }}</li>
+        <li class="list-group-item"><strong>Примітки:</strong> {{ $prescription->notes }}</li>
+    </ul>
+
+    <div class="d-flex gap-2">
+        <a href="{{ route('prescriptions.index') }}" class="btn btn-secondary">Назад до списку</a>
+        <a href="{{ route('prescriptions.edit', $prescription) }}" class="btn btn-warning">Редагувати</a>
+        <form action="{{ route('prescriptions.destroy', $prescription) }}" method="POST" class="d-inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Ви впевнені?')">Видалити</button>
+        </form>
     </div>
 @endsection

@@ -12,7 +12,7 @@
             <p class="card-text"><strong>Опис:</strong> {{ $treatment->description }}</p>
             <p class="card-text"><strong>Дата початку:</strong> {{ $treatment->start_date }}</p>
             <p class="card-text"><strong>Дата закінчення:</strong> {{ $treatment->end_date }}</p>
-            <a href="{{ route('users.index') }}" class="btn btn-secondary">Назад до списку лікувань</a>
+            <a href="{{ route('treatments.index') }}" class="btn btn-secondary">Назад до списку лікувань</a>
         </div>
     </div>
 @endsection

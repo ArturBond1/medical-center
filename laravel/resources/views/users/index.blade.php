@@ -16,7 +16,6 @@
             <th>Ім'я</th>
             <th>Email</th>
             <th>Роль</th>
-            <th>Дії</th>
         </tr>
         </thead>
         <tbody>

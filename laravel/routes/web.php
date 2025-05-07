@@ -7,7 +7,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\DiagnosesController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\PatientController;
@@ -28,7 +27,6 @@ Route::post('/api/test', [TestController::class, 'store'])->withoutMiddleware([V
 
 Route::resource('appointments', AppointmentController::class);
 Route::resource('departments', DepartmentController::class);
-Route::resource('diagnoses', DiagnosesController::class);
 Route::resource('doctors', DoctorController::class);
 Route::resource('medical_records', MedicalRecordController::class);
 Route::resource('patients', PatientController::class);
